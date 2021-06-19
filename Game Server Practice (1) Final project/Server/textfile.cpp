@@ -1,4 +1,5 @@
 #include "textfile.h"
+#include <codecvt>
 
 TextFile::TextFile(std::wstring fileName)
 	: m_fileName(fileName)
@@ -33,6 +34,7 @@ void TextFile::CloseFin()
 
 void TextFile::OpenFout()
 {
+
 	fout.open(m_fileName, std::ios_base::app);
 }
 
@@ -48,7 +50,6 @@ void TextFile::Read(std::wstring& out)
 
 	std::wstringstream buffer;
 	buffer << fin.rdbuf();
-	auto c = buffer.str();
 	out = buffer.str();
 
 	CloseFin();
@@ -58,6 +59,10 @@ void TextFile::Read(std::wstring& out)
 void TextFile::Write(const std::wstring& text)
 {
 	WaitMutex();
+	OpenFout();
 
+	fout << text;
+
+	CloseFout();
 	SignalMutex();
 }
