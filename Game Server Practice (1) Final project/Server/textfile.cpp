@@ -1,5 +1,4 @@
 #include "textfile.h"
-#include <codecvt>
 
 TextFile::TextFile(std::wstring fileName)
 	: m_fileName(fileName)

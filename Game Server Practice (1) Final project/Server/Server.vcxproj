@@ -139,10 +139,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="serverclass.cpp" />
     <ClCompile Include="server_main.cpp" />
     <ClCompile Include="textfile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="packet.h" />
+    <ClInclude Include="serverclass.h" />
     <ClInclude Include="textfile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
