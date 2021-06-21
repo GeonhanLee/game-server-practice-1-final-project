@@ -4,21 +4,23 @@ ServerClass::ServerClass()
 {
 }
 
+ServerClass::~ServerClass()
+{
+}
+
 bool ServerClass::Initialize()
 {
     int retval;
     // 윈속 초기화
-    WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
         return false;
 
     // socket()
-    SOCKET listen_sock = socket(AF_INET, SOCK_STREAM, 0);
+    listen_sock = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_sock == INVALID_SOCKET)
         return false;
 
     // bind()
-    SOCKADDR_IN serveraddr;
     ZeroMemory(&serveraddr, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
