@@ -24,6 +24,11 @@ public:
 
 	Packet packet;
 public:
+	PacketClass()
+		: packet{ 0, PacketClass::Header::Null, L"", 0xff }
+	{
+		SetLength(L"");
+	}
 	PacketClass(PacketClass::Header header, std::wstring data) 
 		: packet{ 0, header, data, 0xff }
 	{

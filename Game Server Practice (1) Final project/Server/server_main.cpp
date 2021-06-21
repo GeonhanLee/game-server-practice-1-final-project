@@ -12,11 +12,13 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 {
 	SOCKET client_sock = (SOCKET)arg;
 	PacketSender* packetSender = new PacketSender(client_sock);
-	PacketClass::Packet* packet = nullptr;
+	PacketClass* packetClass = new PacketClass();
+
+	TextFile* file = new TextFile(L"file.txt");
 
 	while (1) {
 		int retval = 0;
-		packetSender->RecievePacket(packet);
+		retval = packetSender->RecievePacket(&(packetClass->packet));
 		if (retval == SOCKET_ERROR) {
 			// error
 			break;
@@ -25,10 +27,31 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			break;
 		}
 
+		std::wstring str;
 		// 파일 수정
+		switch (packetClass->packet.header)
+		{
+		case PacketClass::Header::Req_Read:
+			file->Read(str);
+			std::wcout << L"READ : "<< str << std::endl;
+			break;
+		case PacketClass::Header::Req_Write:
+			file->Write(packetClass->packet.data);
+			file->Read(str);
+			std::wcout << L"WRITE : " << str << std::endl;
+			break;
+
+		default:
+			break;
+		}
+
 
 	}
+
 	delete packetSender;
+	delete packetClass;
+	delete file;
+
 	return 0;
 }
 
