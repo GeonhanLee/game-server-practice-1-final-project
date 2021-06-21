@@ -31,5 +31,6 @@ public:
 
 	bool CreateProcessThread(_In_ LPTHREAD_START_ROUTINE lpStartAddress);
 
+	SOCKET GetClientSocket();
 };
 

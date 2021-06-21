@@ -71,3 +71,8 @@ bool ServerClass::CreateProcessThread(_In_ LPTHREAD_START_ROUTINE lpStartAddress
     CloseHandle(hThread);
     return true;
 }
+
+SOCKET ServerClass::GetClientSocket()
+{
+    return client_sock;
+}

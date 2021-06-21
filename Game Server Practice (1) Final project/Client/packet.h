@@ -29,10 +29,10 @@ public:
 	{
 		SetLength(L"");
 	}
-	PacketClass(PacketClass::Header header, std::wstring data)
+	PacketClass(PacketClass::Header header, std::wstring data) 
 		: packet{ 0, header, L"", 0xff }
 	{
-		memcpy_s((&(packet.data)), BUFSIZE * sizeof(wchar_t), data.c_str(), data.size() * sizeof(wchar_t));
+		memcpy_s((&(packet.data)), BUFSIZE*sizeof(wchar_t),  data.c_str(), data.size() * sizeof(wchar_t));
 		SetLength(data);
 	}
 	~PacketClass() {
@@ -41,10 +41,10 @@ public:
 
 private:
 	void SetLength(const std::wstring& data) {
-		packet.length =
-			sizeof(int) +
-			sizeof(PacketClass::Header) +
-			data.size() * sizeof(wchar_t) +
+		packet.length = 
+			sizeof(int)+
+			sizeof(PacketClass::Header) + 
+			data.size() * sizeof(wchar_t) + 
 			sizeof(unsigned char);
 	}
 
@@ -119,4 +119,4 @@ public:
 
 		return retval;
 	}
-};
+}; 

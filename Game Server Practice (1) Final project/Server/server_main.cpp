@@ -13,10 +13,12 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 	SOCKET client_sock = (SOCKET)arg;
 	PacketSender* packetSender = new PacketSender(client_sock);
 	PacketClass* packetClass = new PacketClass();
+	PacketClass* returnPacketClass = nullptr;
 
 	TextFile* file = new TextFile(L"file.txt");
 
 	while (1) {
+		// 패킷 수신
 		int retval = 0;
 		retval = packetSender->RecievePacket(&(packetClass->packet));
 		if (retval == SOCKET_ERROR) {
@@ -27,27 +29,49 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 			break;
 		}
 
-		std::wstring str;
 		// 파일 수정
+		std::wstring str;
 		switch (packetClass->packet.header)
 		{
 		case PacketClass::Header::Req_Read:
 			file->Read(str);
-			std::wcout << L"READ : "<< str << std::endl;
+			std::wcout << L"READ : " << str << std::endl;
 			break;
 		case PacketClass::Header::Req_Write:
 			file->Write(packetClass->packet.data);
 			file->Read(str);
 			std::wcout << L"WRITE : " << str << std::endl;
 			break;
-
 		default:
 			break;
 		}
 
+		// 결과 패킷 발신
+		file->Read(str);
+		switch (packetClass->packet.header)
+		{
+		case PacketClass::Header::Req_Read:
+			returnPacketClass = new PacketClass(PacketClass::Header::Ack_Read, str);
+			break;
+		case PacketClass::Header::Req_Write:
+			returnPacketClass = new PacketClass(PacketClass::Header::Ack_Write, str);
+			break;
+		default:
+			break;
+		}
 
+		retval = packetSender->SendPacket(&(returnPacketClass->packet));
+		if (retval == SOCKET_ERROR) {
+			// error
+			break;
+		}
+		else if (retval == 0) {
+			break;
+		}
+		if (!returnPacketClass) delete returnPacketClass;
 	}
-
+	if(!returnPacketClass)
+		delete returnPacketClass;
 	delete packetSender;
 	delete packetClass;
 	delete file;
@@ -56,11 +80,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 }
 
 int wmain() {
-
-	system("chcp 65001");
 	std::locale::global(std::locale(""));
-	system("cls");
-
 
 	ServerClass* server = new ServerClass();
 
@@ -79,25 +99,6 @@ int wmain() {
 		}
 	}
 
-
+	delete server;
 	return 0;
-}
-
-void debug() {
-
-
-	std::wstring fileName(L"file.txt"), fileContent;
-	TextFile* file = new TextFile(fileName);
-
-	//file->Write(L"ㅎㅎ");
-	file->Read(fileContent);
-
-	std::wcout << L"File Content : " << fileContent << std::endl;
-
-	delete file;
-
-	auto packet = new PacketClass(PacketClass::Header::Null, L"");
-	auto packetstruct = packet->packet;
-
-
 }
