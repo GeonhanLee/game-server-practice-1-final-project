@@ -1,4 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
+#define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
+#pragma comment(lib, "ws2_32")
+
 #include <locale.h>
 #include <iostream>
 #include "packet.h"
@@ -7,6 +10,25 @@
 #include "serverclass.h"
 DWORD WINAPI ProcessClient(LPVOID arg)
 {
+	SOCKET client_sock = (SOCKET)arg;
+	PacketSender* packetSender = new PacketSender(client_sock);
+	PacketClass::Packet* packet = nullptr;
+
+	while (1) {
+		int retval = 0;
+		packetSender->RecievePacket(packet);
+		if (retval == SOCKET_ERROR) {
+			// error
+			break;
+		}
+		else if (retval == 0) {
+			break;
+		}
+
+		// 파일 수정
+
+	}
+	delete packetSender;
 	return 0;
 }
 
