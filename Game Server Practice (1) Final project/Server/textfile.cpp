@@ -3,22 +3,26 @@
 TextFile::TextFile(std::wstring fileName)
 	: m_fileName(fileName)
 {
-	m_mutex = CreateMutexW(NULL, FALSE, NULL);
+	rw_mutex = CreateMutexW(NULL, FALSE, NULL);
+	mutex = CreateMutexW(NULL, FALSE, NULL);
+
+	readcount = 0;
 }
 
 TextFile::~TextFile()
 {
-	CloseHandle(m_mutex);
+	CloseHandle(rw_mutex);
+	CloseHandle(mutex);
 }
 
-void TextFile::WaitMutex()
+void TextFile::WaitMutex(HANDLE _mutex)
 {
-	WaitForSingleObject(m_mutex, INFINITE);
+	WaitForSingleObject(_mutex, INFINITE);
 }
 
-void TextFile::SignalMutex()
+void TextFile::SignalMutex(HANDLE _mutex)
 {
-	ReleaseMutex(m_mutex);
+	ReleaseMutex(_mutex);
 }
 
 void TextFile::OpenFin()
@@ -44,24 +48,32 @@ void TextFile::CloseFout()
 
 void TextFile::Read(std::wstring& out)
 {
-	WaitMutex();
-	OpenFin();
+	WaitMutex(mutex);
+	readcount++;
+	if (readcount == 1)
+		WaitMutex(rw_mutex);
+	SignalMutex(mutex);
 
+	OpenFin();
 	std::wstringstream buffer;
 	buffer << fin.rdbuf();
 	out = buffer.str();
-
 	CloseFin();
-	SignalMutex();
+
+	WaitMutex(mutex);
+	readcount--;
+	if (readcount == 0)
+		SignalMutex(rw_mutex);
+	SignalMutex(mutex);
 }
 
 void TextFile::Write(const std::wstring& text)
 {
-	WaitMutex();
+	WaitMutex(rw_mutex);
+
 	OpenFout();
-
 	fout << text;
-
 	CloseFout();
-	SignalMutex();
+
+	SignalMutex(rw_mutex);
 }

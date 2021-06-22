@@ -11,9 +11,12 @@ public:
 	TextFile(std::wstring fileName);
 	~TextFile();
 private:
-	HANDLE m_mutex;
-	void WaitMutex();
-	void SignalMutex();
+	HANDLE rw_mutex;
+	HANDLE mutex;
+	int readcount;
+
+	void WaitMutex(HANDLE);
+	void SignalMutex(HANDLE);
 
 	std::wstring m_fileName;
 

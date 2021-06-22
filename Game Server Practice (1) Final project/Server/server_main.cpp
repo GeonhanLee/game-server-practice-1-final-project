@@ -10,12 +10,13 @@
 #include "serverclass.h"
 DWORD WINAPI ProcessClient(LPVOID arg)
 {
-	SOCKET client_sock = (SOCKET)arg;
+	auto param = (ServerClass::ClientThreadParam*)arg;
+
+	SOCKET client_sock = param->clientSocket;
+	TextFile* file = param->file;
+
 	PacketSender* packetSender = new PacketSender(client_sock);
 	PacketClass* packetClass = new PacketClass();
-	PacketClass* returnPacketClass = nullptr;
-
-	TextFile* file = new TextFile(L"file.txt");
 
 	while (1) {
 		// 패킷 수신
@@ -47,6 +48,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		}
 
 		// 결과 패킷 발신
+		PacketClass* returnPacketClass = nullptr;
 		file->Read(str);
 		switch (packetClass->packet.header)
 		{
@@ -63,18 +65,18 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 		retval = packetSender->SendPacket(&(returnPacketClass->packet));
 		if (retval == SOCKET_ERROR) {
 			// error
+
+			if (returnPacketClass) delete returnPacketClass;
 			break;
 		}
 		else if (retval == 0) {
+			if (returnPacketClass) delete returnPacketClass;
 			break;
 		}
-		if (!returnPacketClass) delete returnPacketClass;
+		if (returnPacketClass) delete returnPacketClass;
 	}
-	if(!returnPacketClass)
-		delete returnPacketClass;
 	delete packetSender;
 	delete packetClass;
-	delete file;
 
 	return 0;
 }
@@ -83,6 +85,7 @@ int wmain() {
 	std::locale::global(std::locale(""));
 
 	ServerClass* server = new ServerClass();
+	TextFile* file = new TextFile(L"file.txt");
 
 	if (!server->Initialize()) {
 		return 1;
@@ -93,12 +96,15 @@ int wmain() {
 			break;
 		}
 
+		auto clientThreadParam = ServerClass::ClientThreadParam{ server->GetClientSocket(), file};
+
 		//스레드 생성
-		if (!server->CreateProcessThread(ProcessClient)) {
+		if (!server->CreateProcessThread(ProcessClient, &clientThreadParam)) {
 			server->CloseCurrentClientSocket();
 		}
 	}
 
 	delete server;
+	delete file;
 	return 0;
 }

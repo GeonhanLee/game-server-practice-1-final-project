@@ -60,11 +60,11 @@ void ServerClass::CloseCurrentClientSocket()
     closesocket(client_sock);
 }
 
-bool ServerClass::CreateProcessThread(_In_ LPTHREAD_START_ROUTINE lpStartAddress)
+bool ServerClass::CreateProcessThread(_In_ LPTHREAD_START_ROUTINE lpStartAddress, ServerClass::ClientThreadParam* param)
 {
     HANDLE hThread;
     hThread = CreateThread(NULL, 0, lpStartAddress,
-        (LPVOID)client_sock, 0, NULL);
+        (LPVOID)param, 0, NULL);
     if (hThread == NULL) {
         return false;
     }

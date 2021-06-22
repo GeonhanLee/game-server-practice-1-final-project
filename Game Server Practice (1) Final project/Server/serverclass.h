@@ -3,7 +3,7 @@
 #include <winsock2.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "textfile.h"
 #define SERVERPORT 9000
 #define BUFSIZE    512
 
@@ -29,7 +29,12 @@ public:
 	bool AcceptClient();
 	void CloseCurrentClientSocket();
 
-	bool CreateProcessThread(_In_ LPTHREAD_START_ROUTINE lpStartAddress);
+	typedef struct clientThreadParam {
+		SOCKET clientSocket;
+		TextFile* file;
+	} ClientThreadParam;
+
+	bool CreateProcessThread(_In_ LPTHREAD_START_ROUTINE lpStartAddress, ServerClass::ClientThreadParam* param);
 
 	SOCKET GetClientSocket();
 };
