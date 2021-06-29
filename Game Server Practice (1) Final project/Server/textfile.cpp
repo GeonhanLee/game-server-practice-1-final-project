@@ -50,20 +50,23 @@ void TextFile::Read(std::wstring& out)
 {
 	WaitMutex(mutex);
 	readcount++;
-	if (readcount == 1)
+	if (readcount == 1) {
 		WaitMutex(rw_mutex);
+		OpenFin();
+	}
 	SignalMutex(mutex);
 
-	OpenFin();
+	
 	std::wstringstream buffer;
 	buffer << fin.rdbuf();
 	out = buffer.str();
-	CloseFin();
 
 	WaitMutex(mutex);
 	readcount--;
-	if (readcount == 0)
+	if (readcount == 0) {
+		CloseFin();
 		SignalMutex(rw_mutex);
+	}
 	SignalMutex(mutex);
 }
 
